@@ -1,0 +1,21 @@
+## Docker commands used during local development and testing
+
+# Build the image from the techtrends directory, tag it as techtrends
+docker build -t techtrends ./techtrends
+
+# Run it detached, map host port 7111 to container port 3111
+docker run -d -p 7111:3111 techtrends
+
+# Check the running container and grab its ID
+docker ps
+
+# Pull logs from the container (swap in your actual container ID)
+docker logs <container_id>
+
+## Sample log output captured from a local test run:
+# INFO:werkzeug:127.0.0.1 - - [08/Jan/2021 22:40:06] "GET /metrics HTTP/1.1" 200 -
+# INFO:werkzeug:127.0.0.1 - - [08/Jan/2021 22:40:09] "GET / HTTP/1.1" 200 -
+# INFO:app:01/08/2021, 22:40:10, Article "The Rise of WebAssembly in Cloud Native Environments" retrieved!
+# INFO:app:01/08/2021, 22:40:15, "About Us" page retrieved!
+# INFO:app:01/08/2021, 22:40:22, New article created with title: "My first test post"
+# ERROR:app:01/08/2021, 22:40:31, A non-existing article was accessed. ID: 99

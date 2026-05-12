@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1 class="page-title">Write a New Article</h1>
+<div class="post-body">
+    <form method="post">
+        <div class="form-group">
+            <label for="title">Title</label>
+            <input type="text" name="title" id="title" placeholder="Give your article a clear title">
+        </div>
+        <div class="form-group">
+            <label for="content">Content</label>
+            <textarea name="content" id="content" rows="10"
+                      placeholder="Write your article here..."></textarea>
+        </div>
+        <button type="submit" class="btn-submit">Publish</button>
+    </form>
+</div>
+{% endblock %}

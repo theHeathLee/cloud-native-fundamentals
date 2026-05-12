@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1 class="page-title">Latest Articles</h1>
+
+{% if posts %}
+    {% for post in posts %}
+    <div class="post-card">
+        <h2><a href="{{ url_for('post', post_id=post['id']) }}">{{ post['title'] }}</a></h2>
+        <span class="post-meta">Published: {{ post['created'] }}</span>
+    </div>
+    {% endfor %}
+{% else %}
+    <p>No articles yet. <a href="{{ url_for('create') }}">Be the first to write one!</a></p>
+{% endif %}
+{% endblock %}

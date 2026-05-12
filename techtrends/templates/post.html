@@ -1,0 +1,11 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="post-body">
+    <h1>{{ post['title'] }}</h1>
+    <p class="post-meta">{{ post['created'] }}</p>
+    <hr style="border:none;border-top:1px solid #eee;margin:1rem 0">
+    <p>{{ post['content'] }}</p>
+</div>
+<a href="{{ url_for('index') }}" class="back-link">&#8592; Back to articles</a>
+{% endblock %}
