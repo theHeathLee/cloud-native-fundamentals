@@ -1,69 +1,8 @@
 # TechTrends
 
-A cloud-native news sharing web application built with Flask, containerized with Docker, and deployed to Kubernetes using Helm and ArgoCD.
+TechTrends is a Flask web app where users can read and post tech articles. This project covers the full cloud-native lifecycle — packaging with Docker, deploying to Kubernetes with raw manifests and Helm, and setting up GitOps with ArgoCD.
 
-## Overview
-
-TechTrends allows users to browse, create, and share technology articles. It exposes health and metrics endpoints for observability, and is designed for GitOps-style continuous deployment across staging and production environments.
-
-## Tech Stack
-
-| Layer | Technology |
-|---|---|
-| Application | Python 3.8 / Flask |
-| Database | SQLite |
-| Container | Docker |
-| Orchestration | Kubernetes (k3s) |
-| Package Manager | Helm |
-| GitOps | ArgoCD |
-| CI/CD | GitHub Actions |
-| Local Dev | Vagrant + VirtualBox |
-
-## Project Structure
-
-```
-.
-├── techtrends/           # Flask application
-│   ├── app.py            # Main application & routes
-│   ├── init_db.py        # Database initializer
-│   ├── schema.sql        # SQLite schema
-│   ├── requirements.txt
-│   ├── Dockerfile
-│   ├── static/
-│   └── templates/
-├── kubernetes/           # Raw Kubernetes manifests
-│   ├── namespace.yaml
-│   ├── deploy.yaml
-│   └── service.yaml
-├── helm/                 # Helm chart
-│   ├── Chart.yaml
-│   ├── values.yaml           # Defaults (sandbox)
-│   ├── values-staging.yaml
-│   ├── values-prod.yaml
-│   └── templates/
-├── argocd/               # ArgoCD Application manifests
-│   ├── argocd-server-nodeport.yaml
-│   ├── helm-techtrends-staging.yaml
-│   └── helm-techtrends-prod.yaml
-├── Vagrantfile           # Local k3s VM
-└── .github/workflows/
-    └── techtrends-dockerhub.yml  # Docker build & push CI
-```
-
-## Application Endpoints
-
-| Endpoint | Description |
-|---|---|
-| `GET /` | Home — list all articles |
-| `GET /<id>` | View a single article |
-| `GET /create` | Create a new article |
-| `GET /about` | About page |
-| `GET /healthz` | Liveness/readiness probe |
-| `GET /metrics` | DB connection count and post count |
-
-## Running Locally
-
-**Prerequisites:** Python 3.8+
+## Running the app locally
 
 ```bash
 cd techtrends
@@ -72,82 +11,65 @@ python init_db.py
 python app.py
 ```
 
-App runs at `http://localhost:3111`.
+Runs on `http://localhost:3111`.
 
 ## Docker
 
 ```bash
-# Build
 docker build -t techtrends ./techtrends
-
-# Run
-docker run -p 3111:3111 techtrends
+docker run -d -p 7111:3111 techtrends
 ```
 
-## CI/CD — GitHub Actions
+The image is also published to Docker Hub automatically via GitHub Actions on every push to `main`. The workflow lives in [.github/workflows/techtrends-dockerhub.yml](.github/workflows/techtrends-dockerhub.yml) and needs two repo secrets set:
 
-On every push to `main`, the workflow in [.github/workflows/techtrends-dockerhub.yml](.github/workflows/techtrends-dockerhub.yml) builds and pushes the image to Docker Hub.
+- `DOCKERHUB_USERNAME`
+- `DOCKERHUB_TOKEN` — needs Read & Write scope
 
-**Required GitHub secrets:**
+## Kubernetes
 
-| Secret | Value |
-|---|---|
-| `DOCKERHUB_USERNAME` | Your Docker Hub username |
-| `DOCKERHUB_TOKEN` | Docker Hub access token (Read & Write) |
-
-```bash
-gh secret set DOCKERHUB_USERNAME
-gh secret set DOCKERHUB_TOKEN
-```
-
-## Kubernetes Deployment
-
-### Raw manifests
+Raw manifests are in `kubernetes/`. To deploy:
 
 ```bash
 kubectl apply -f kubernetes/
 ```
 
-### Helm
+For Helm:
 
 ```bash
-# Staging
+# staging
 helm upgrade --install techtrends ./helm -f helm/values-staging.yaml
 
-# Production
+# production
 helm upgrade --install techtrends ./helm -f helm/values-prod.yaml
 ```
 
-### Environment comparison
+Prod runs 5 replicas on port 7111. Staging runs 1 replica on port 5111.
 
-| Setting | Staging | Production |
-|---|---|---|
-| Replicas | 1 | 5 |
-| Service port | 5111 | 7111 |
-| Image pull policy | IfNotPresent | Always |
-| Memory limit | 128Mi | 256Mi |
+## ArgoCD
 
-## GitOps with ArgoCD
-
-ArgoCD watches this repo and syncs the Helm chart to the cluster automatically.
-
-1. Update the `repoURL` in [argocd/helm-techtrends-staging.yaml](argocd/helm-techtrends-staging.yaml) and [argocd/helm-techtrends-prod.yaml](argocd/helm-techtrends-prod.yaml) with your GitHub repo URL.
-2. Apply the ArgoCD Application manifests:
+The `argocd/` directory has Application manifests pointing at this repo. Apply them once ArgoCD is installed on the cluster:
 
 ```bash
 kubectl apply -f argocd/
 ```
 
+ArgoCD will then keep staging and prod in sync with the Helm chart in this repo.
+
 ## Local Kubernetes with Vagrant
 
-Spins up a k3s single-node cluster in a VirtualBox VM:
+To spin up a local k3s cluster:
 
 ```bash
 vagrant up
 ```
 
-The VM is reachable at `192.168.50.4`. Export the kubeconfig:
+VM IP is `192.168.50.4`, 2GB RAM, 2 CPUs.
 
-```bash
-export KUBECONFIG=/etc/rancher/k3s/k3s.yaml
-```
+## App endpoints
+
+- `GET /` — article list
+- `GET /<id>` — single article
+- `GET /create` — new article form
+- `GET /about` — about page
+- `GET /healthz` — health check (used for liveness/readiness probes)
+- `GET /metrics` — returns post count and total DB connections
