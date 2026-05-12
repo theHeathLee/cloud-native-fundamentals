@@ -17,6 +17,12 @@ spec:
         - name: techtrends
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
+          env:
+            - name: FLASK_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: techtrends-secret
+                  key: flask-secret-key
           ports:
             - containerPort: {{ .Values.containerPort }}
           resources:

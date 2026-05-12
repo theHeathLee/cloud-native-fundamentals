@@ -1,5 +1,7 @@
 namespace: sandbox
 
+flaskSecretKey: ""  # set via --set flaskSecretKey=... or a values override, never commit a real value
+
 service:
   port: 4111
   targetPort: 3111
