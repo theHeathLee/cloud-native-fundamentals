@@ -21,6 +21,12 @@ spec:
         - name: techtrends
           image: techtrends:latest
           imagePullPolicy: IfNotPresent
+          env:
+            - name: FLASK_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: techtrends-secret
+                  key: flask-secret-key
           ports:
             - containerPort: 3111
           resources:

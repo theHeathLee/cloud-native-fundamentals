@@ -1,3 +1,4 @@
+import os
 import sqlite3
 import logging
 import sys
@@ -5,7 +6,7 @@ from flask import Flask, jsonify, render_template, request, url_for, redirect, f
 from werkzeug.exceptions import abort
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = 'f3cfe9ed8fae309f02079dbf'
+app.config['SECRET_KEY'] = os.environ['FLASK_SECRET_KEY']
 
 connection_count = 0
 
